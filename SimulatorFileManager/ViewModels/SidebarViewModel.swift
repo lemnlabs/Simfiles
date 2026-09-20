@@ -85,7 +85,7 @@ final class SidebarViewModel {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = true
         panel.allowedContentTypes = [.image, .movie, .video]
-        panel.prompt = "사진/동영상 추가"
+        panel.prompt = String(localized: .simulatorActionAddMedia)
 
         if panel.runModal() == .OK {
             let urls = panel.urls

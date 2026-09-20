@@ -45,7 +45,7 @@ struct AppRowView: View {
                         .lineLimit(1)
 
                     if !app.version.isEmpty {
-                        Text("v\(app.version)")
+                        Text(verbatim: "v\(app.version)")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                             .lineLimit(1)
@@ -61,7 +61,7 @@ struct AppRowView: View {
             Spacer()
 
             if app.isSystemApp {
-                Text("System")
+                Text(.appListRowSystemBadge)
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
                     .padding(.horizontal, 4)
@@ -73,17 +73,17 @@ struct AppRowView: View {
                 Circle()
                     .fill(.green)
                     .frame(width: 8, height: 8)
-                    .help("실행 중")
+                    .help(.appListRowRunningHelp)
             }
         }
         .padding(.vertical, 3)
         .contextMenu {
-            Button("Finder에서 데이터 폴더 열기") {
+            Button(.appListRowOpenDataFolder) {
                 onRevealInFinder()
             }
 
             if app.bundleURL != nil {
-                Button("Finder에서 앱 번들(.app) 열기") {
+                Button(.appListRowOpenAppBundle) {
                     if let onRevealBundleInFinder {
                         onRevealBundleInFinder()
                     } else if let bundleURL = app.bundleURL {
@@ -94,7 +94,7 @@ struct AppRowView: View {
 
             Divider()
 
-            Button("Bundle ID 복사") {
+            Button(.appListRowCopyBundleId) {
                 if let onCopyBundleId {
                     onCopyBundleId()
                 } else {
@@ -103,7 +103,7 @@ struct AppRowView: View {
                 }
             }
 
-            Button("데이터 폴더 경로 복사") {
+            Button(.appListRowCopyDataPath) {
                 if let onCopyDataPath {
                     onCopyDataPath()
                 } else {

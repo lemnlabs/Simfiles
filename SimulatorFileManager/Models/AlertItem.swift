@@ -2,10 +2,10 @@ import Foundation
 
 struct AlertItem: Identifiable, Equatable {
     let id: UUID
-    let title: String
+    let title: LocalizedStringResource
     let message: String
 
-    init(id: UUID = UUID(), title: String, message: String) {
+    init(id: UUID = UUID(), title: LocalizedStringResource, message: String) {
         self.id = id
         self.title = title
         self.message = message
@@ -13,7 +13,9 @@ struct AlertItem: Identifiable, Equatable {
 }
 
 extension AlertItem {
-    static func error(_ error: Error, title: String = "오류 발생") -> AlertItem {
+    static func error(_ error: Error, title: LocalizedStringResource = .commonErrorOccurred)
+        -> AlertItem
+    {
         AlertItem(title: title, message: error.localizedDescription)
     }
 }

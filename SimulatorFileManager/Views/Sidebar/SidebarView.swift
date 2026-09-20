@@ -29,12 +29,12 @@ struct SidebarView: View {
         Group {
             if viewModel.isLoading && viewModel.devices.isEmpty {
                 ProgressView {
-                    Text("시뮬레이터 검색 중...")
+                    Text(.sidebarSimulatorSearching)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if viewModel.filteredDevices.isEmpty {
                 ContentUnavailableView(
-                    "시뮬레이터가 없습니다.",
+                    .sidebarSimulatorEmpty,
                     systemImage: "iphone.slash"
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -90,26 +90,26 @@ struct SidebarView: View {
         .searchable(
             text: $viewModel.searchText,
             placement: .sidebar,
-            prompt: "시뮬레이터 검색"
+            prompt: Text(.sidebarSimulatorSearchPrompt)
         )
         .toolbar {
             if columnVisibility == .all {
                 ToolbarItemGroup {
                     Button(
-                        "새로고침",
+                        .commonRefresh,
                         systemImage: "arrow.clockwise"
                     ) {
                         Task {
                             await viewModel.refreshDevices()
                         }
                     }
-                    .help("새로고침")
+                    .help(.commonRefresh)
 
-                    Menu("필터", systemImage: "line.3.horizontal.decrease") {
-                        Toggle("켜진 기기만", isOn: $viewModel.showOnlyBooted)
+                    Menu(.commonFilter, systemImage: "line.3.horizontal.decrease") {
+                        Toggle(.sidebarFilterBootedOnly, isOn: $viewModel.showOnlyBooted)
                     }
                     .menuIndicator(.hidden)
-                    .help("필터")
+                    .help(.commonFilter)
                 }
             }
         }

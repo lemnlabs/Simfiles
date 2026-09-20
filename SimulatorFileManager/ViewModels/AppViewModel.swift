@@ -24,19 +24,19 @@ final class AppViewModel {
         return "Simulator File Manager"
     }
 
-    func showAlert(title: String, message: String) {
+    func showAlert(title: LocalizedStringResource, message: String) {
         activeAlert = AlertItem(title: title, message: message)
     }
 
-    func showError(_ error: Error, title: String = "오류 발생") {
+    func showError(_ error: Error, title: LocalizedStringResource = .commonErrorOccurred) {
         activeAlert = .error(error, title: title)
     }
 
     func handleIncomingExternalFiles(_ urls: [URL]) {
         guard let app = selectedApp else {
             showAlert(
-                title: "전송 대상 앱 없음",
-                message: "파일을 넣을 대상 시뮬레이터와 앱을 먼저 선택해 주세요."
+                title: .appImportNoTargetTitle,
+                message: String(localized: .appImportNoTargetMessage)
             )
             return
         }
@@ -44,11 +44,12 @@ final class AppViewModel {
         do {
             let imported = try fileService.importFiles(from: urls, to: app.documentsURL)
             showAlert(
-                title: "파일 추가 완료",
-                message: "\(imported.count)개 파일이 '\(app.displayName)'의 Documents 폴더로 복사되었습니다."
+                title: .appImportSuccessTitle,
+                message: String(
+                    localized: .appImportSuccessMessage(imported.count, app.displayName))
             )
         } catch {
-            showError(error, title: "파일 추가 실패")
+            showError(error, title: .appImportFailureTitle)
         }
     }
 

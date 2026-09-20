@@ -3,10 +3,20 @@ import Foundation
 import Observation
 import UniformTypeIdentifiers
 
-enum AppFilterScope: String, CaseIterable, Identifiable {
-    case userOnly = "사용자 앱"
-    case all = "전체"
-    var id: String { rawValue }
+enum AppFilterScope: CaseIterable, Identifiable {
+    case userOnly
+    case all
+
+    var id: Self { self }
+
+    var title: LocalizedStringResource {
+        switch self {
+        case .userOnly:
+            return .appListFilterUserApps
+        case .all:
+            return .appListFilterAllApps
+        }
+    }
 }
 
 @Observable
@@ -105,7 +115,7 @@ final class AppListViewModel {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = true
         panel.allowedContentTypes = [.image, .movie, .video]
-        panel.prompt = "사진/동영상 추가"
+        panel.prompt = String(localized: .simulatorActionAddMedia)
 
         if panel.runModal() == .OK {
             let urls = panel.urls

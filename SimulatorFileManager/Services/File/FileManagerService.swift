@@ -76,7 +76,7 @@ nonisolated final class FileManagerService: FileManagerServiceProtocol, Sendable
             let fileName = sourceURL.lastPathComponent
             var targetURL = destinationDirectory.appendingPathComponent(fileName)
 
-            // 중복 파일 존재 시 고유 파일명 생성
+            // Generate unique filename if duplicate exists
             if fileManager.fileExists(atPath: targetURL.path) {
                 targetURL = uniqueURL(for: targetURL, in: destinationDirectory)
             }
@@ -89,7 +89,7 @@ nonisolated final class FileManagerService: FileManagerServiceProtocol, Sendable
     }
 
     func deleteItem(at url: URL) throws {
-        // 휴지통으로 안전하게 이동
+        // Safely move to Trash
         var resultURL: NSURL?
         try FileManager.default.trashItem(at: url, resultingItemURL: &resultURL)
     }
@@ -114,7 +114,7 @@ nonisolated final class FileManagerService: FileManagerServiceProtocol, Sendable
         for sourceURL in sourceURLs {
             let sourceStandardPath = sourceURL.standardizedFileURL.path
 
-            // 상위 폴더를 하위 폴더로 이동하려는 시도 방지
+            // Prevent moving a parent folder into its own child folder
             if destStandardPath == sourceStandardPath
                 || destStandardPath.hasPrefix(sourceStandardPath + "/")
             {
@@ -123,7 +123,10 @@ nonisolated final class FileManagerService: FileManagerServiceProtocol, Sendable
                     code: 1001,
                     userInfo: [
                         NSLocalizedDescriptionKey:
-                            "'\(sourceURL.lastPathComponent)' 폴더를 자신의 하위 디렉토리로 이동할 수 없습니다."
+                            String(
+                                localized: .fileServiceErrorRecursiveMove(
+                                    sourceURL.lastPathComponent)
+                            )
                     ]
                 )
             }
@@ -131,12 +134,12 @@ nonisolated final class FileManagerService: FileManagerServiceProtocol, Sendable
             let fileName = sourceURL.lastPathComponent
             var targetURL = destinationDirectory.appendingPathComponent(fileName)
 
-            // 이미 동일한 위치에 있는 경우 건너뜀
+            // Skip if already in the same location
             if sourceStandardPath == targetURL.standardizedFileURL.path {
                 continue
             }
 
-            // 대상 위치에 중복 파일 존재 시 고유 파일명 생성
+            // Generate unique filename if duplicate exists at destination
             if fileManager.fileExists(atPath: targetURL.path) {
                 targetURL = uniqueURL(for: targetURL, in: destinationDirectory)
             }

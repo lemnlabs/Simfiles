@@ -101,21 +101,23 @@ struct FileBrowserDetailView: View {
             viewModel.switchDirectory(to: .root)
             viewModel.clearHistory()
         }
-        .alert("오류", isPresented: $viewModel.showingError) {
-            Button("확인", role: .cancel) {}
+        .alert(Text(.commonError), isPresented: $viewModel.showingError) {
+            Button(.commonOk, role: .cancel) {}
         } message: {
             Text(viewModel.errorMessage)
         }
-        .alert("새 폴더", isPresented: $viewModel.showingNewFolderDialog) {
-            TextField("폴더 이름", text: $viewModel.newFolderName)
+        .alert(Text(.fileBrowserNewFolderTitle), isPresented: $viewModel.showingNewFolderDialog) {
+            TextField(text: $viewModel.newFolderName) {
+                Text(.fileBrowserNewFolderNamePlaceholder)
+            }
 
-            Button("취소", role: .cancel) {
+            Button(.commonCancel, role: .cancel) {
                 viewModel.showingNewFolderDialog = false
                 viewModel.newFolderName = ""
             }
             .keyboardShortcut(.cancelAction)
 
-            Button("생성") {
+            Button(.commonCreate) {
                 viewModel.createFolder()
             }
             .keyboardShortcut(.defaultAction)
@@ -134,21 +136,19 @@ struct FileBrowserDetailView: View {
             isPresented: $viewModel.showingDeleteConfirmation,
             titleVisibility: .visible
         ) {
-            Button("휴지통으로 이동", role: .destructive) {
+            Button(.fileBrowserDeleteConfirmAction, role: .destructive) {
                 viewModel.executeDelete()
             }
-            Button("취소", role: .cancel) {
+            Button(.commonCancel, role: .cancel) {
                 viewModel.cancelDelete()
             }
         } message: {
             if viewModel.itemsPendingDeletion.count == 1,
                 let item = viewModel.itemsPendingDeletion.first
             {
-                Text("'\(item.name)' 항목이 휴지통으로 이동됩니다.")
+                Text(.fileBrowserDeleteMessageSingle(item.name))
             } else {
-                Text(
-                    "선택한 \(viewModel.itemsPendingDeletion.count)개 항목이 휴지통으로 이동됩니다."
-                )
+                Text(.fileBrowserDeleteMessageMultiple(viewModel.itemsPendingDeletion.count))
             }
         }
     }
@@ -161,10 +161,10 @@ struct FileBrowserDetailView: View {
                 .font(.largeTitle)
                 .imageScale(.large)
                 .foregroundStyle(.secondary)
-            Text("폴더가 비어 있습니다.")
+            Text(.fileBrowserEmptyTitle)
                 .font(.headline)
                 .foregroundStyle(.secondary)
-            Text("Finder에서 파일을 끌어다 놓거나 상단의 '파일 추가' 버튼을 눌러보세요.")
+            Text(.fileBrowserEmptyDescription)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -196,7 +196,7 @@ extension FileBrowserDetailView {
                 .lineLimit(1)
 
             if !viewModel.app.version.isEmpty {
-                Text("v\(viewModel.app.version)")
+                Text(verbatim: "v\(viewModel.app.version)")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .padding(.horizontal, 4)
@@ -208,45 +208,48 @@ extension FileBrowserDetailView {
 
     @ViewBuilder
     private var toolbarActionButtons: some View {
-        // 1. 앱 실행 / 종료 토글
+        // 1. App execution toggle
         if viewModel.device.state.isBooted && viewModel.app.bundleURL != nil {
             Button {
                 viewModel.toggleAppExecution()
             } label: {
                 Label(
-                    viewModel.isAppRunning ? "앱 종료" : "앱 실행",
+                    viewModel.isAppRunning
+                        ? .fileBrowserToolbarTerminateApp : .fileBrowserToolbarLaunchApp,
                     systemImage: viewModel.isAppRunning ? "stop.fill" : "play.fill"
                 )
             }
             .foregroundStyle(viewModel.isAppRunning ? .orange : .green)
             .disabled(viewModel.isPerformingAppAction)
-            .help(viewModel.isAppRunning ? "실행 중인 앱 종료" : "앱 실행")
+            .help(
+                viewModel.isAppRunning
+                    ? .fileBrowserToolbarTerminateAppHelp : .fileBrowserToolbarLaunchApp)
         }
 
-        // 2. 파일 추가 (Import)
+        // 2. Add Files (Import)
         Button {
             viewModel.selectFileToImport()
         } label: {
-            Label("파일 추가", systemImage: "square.and.arrow.down")
+            Label(.fileBrowserToolbarAddFiles, systemImage: "square.and.arrow.down")
         }
-        .help("Mac에서 파일을 선택하여 현재 폴더로 가져옵니다.")
+        .help(.fileBrowserToolbarAddFilesHelp)
 
-        // 3. 새 폴더
+        // 3. New Folder
         Button {
             viewModel.showingNewFolderDialog = true
         } label: {
-            Label("새로운 폴더", systemImage: "folder.badge.plus")
+            Label(.fileBrowserToolbarNewFolder, systemImage: "folder.badge.plus")
         }
-        .help("새 폴더 생성")
+        .help(.fileBrowserToolbarNewFolderHelp)
 
-        // 4. 정렬 메뉴
+        // 4. Sort Menu
         Menu {
-            Section("정렬 기준") {
+            Section(.fileBrowserSortSectionTitle) {
                 Button {
                     viewModel.sortOrder = [KeyPathComparator(\.name, order: .forward)]
                 } label: {
                     HStack {
-                        Text("이름")
+                        Text(.fileBrowserSortName)
                         if viewModel.isSortedBy(\.name) { Image(systemName: "checkmark") }
                     }
                 }
@@ -254,7 +257,7 @@ extension FileBrowserDetailView {
                     viewModel.sortOrder = [KeyPathComparator(\.typeDescription, order: .forward)]
                 } label: {
                     HStack {
-                        Text("종류")
+                        Text(.fileBrowserSortKind)
                         if viewModel.isSortedBy(\.typeDescription) {
                             Image(systemName: "checkmark")
                         }
@@ -264,7 +267,7 @@ extension FileBrowserDetailView {
                     viewModel.sortOrder = [KeyPathComparator(\.size, order: .forward)]
                 } label: {
                     HStack {
-                        Text("크기")
+                        Text(.fileBrowserSortSize)
                         if viewModel.isSortedBy(\.size) { Image(systemName: "checkmark") }
                     }
                 }
@@ -272,7 +275,7 @@ extension FileBrowserDetailView {
                     viewModel.sortOrder = [KeyPathComparator(\.sortableDate, order: .reverse)]
                 } label: {
                     HStack {
-                        Text("수정일")
+                        Text(.fileBrowserSortDateModified)
                         if viewModel.isSortedBy(\.sortableDate) { Image(systemName: "checkmark") }
                     }
                 }
@@ -280,23 +283,23 @@ extension FileBrowserDetailView {
 
             Divider()
 
-            Toggle("폴더 항상 위에 표시", isOn: $viewModel.foldersAlwaysOnTop)
+            Toggle(.fileBrowserSortKeepFoldersOnTop, isOn: $viewModel.foldersAlwaysOnTop)
         } label: {
-            Label("정렬", systemImage: "arrow.up.arrow.down")
+            Label(.fileBrowserSortButtonLabel, systemImage: "arrow.up.arrow.down")
         }
-        .help("정렬 옵션")
+        .help(.fileBrowserSortButtonHelp)
 
-        // 5. 더보기 / 동작 (Action Menu)
+        // 5. Action Menu
         Menu {
-            Button("Finder에서 열기") {
+            Button(.fileBrowserActionOpenInFinder) {
                 viewModel.openInFinder()
             }
 
-            Button("터미널에서 열기") {
+            Button(.fileBrowserActionOpenInTerminal) {
                 viewModel.openInTerminal()
             }
 
-            Button("현재 폴더 경로 복사") {
+            Button(.fileBrowserActionCopyCurrentPath) {
                 viewModel.copyCurrentPath()
             }
 
@@ -304,8 +307,8 @@ extension FileBrowserDetailView {
                 Divider()
                 Button(
                     viewModel.clipboardService.isCut
-                        ? "잘라낸 항목 이동 (\(viewModel.clipboardService.count)개)"
-                        : "복사한 항목 붙여넣기 (\(viewModel.clipboardService.count)개)"
+                        ? .fileBrowserActionMoveCutCount(viewModel.clipboardService.count)
+                        : .fileBrowserActionPasteCopiedCount(viewModel.clipboardService.count)
                 ) {
                     viewModel.pasteClipboard(to: viewModel.currentPathURL)
                 }
@@ -313,37 +316,41 @@ extension FileBrowserDetailView {
 
             if !viewModel.selectedFiles.isEmpty {
                 Divider()
-                Menu("선택 항목 이동...") {
+                Menu(.fileBrowserActionMoveSelection) {
                     FileBrowserMoveMenu(viewModel: viewModel, items: viewModel.selectedFiles)
                 }
-                Button("선택 항목 복사") {
+                Button(.fileBrowserActionCopySelection) {
                     viewModel.copyItems(viewModel.selectedFiles)
                 }
-                Button("선택 항목 잘라내기") {
+                Button(.fileBrowserActionCutSelection) {
                     viewModel.cutItems(viewModel.selectedFiles)
                 }
-                Button("선택 항목 경로 복사") {
+                Button(.fileBrowserActionCopySelectionPaths) {
                     viewModel.copyPaths(for: viewModel.selectedFiles)
                 }
             }
 
             Divider()
 
-            Button("새로고침") {
+            Button(.commonRefresh) {
                 viewModel.reloadFiles()
             }
         } label: {
-            Label("동작", systemImage: "ellipsis.circle")
+            Label(.fileBrowserToolbarActionLabel, systemImage: "ellipsis.circle")
         }
-        .help("추가 동작")
+        .help(.fileBrowserToolbarActionHelp)
 
-        // 6. 삭제 (선택 항목이 있을 때 활성화)
+        // 6. Delete
         Button(role: .destructive) {
             viewModel.confirmDelete(items: viewModel.selectedFiles)
         } label: {
-            Label("삭제", systemImage: "trash")
+            Label(.fileBrowserToolbarDeleteLabel, systemImage: "trash")
         }
         .disabled(viewModel.selectedItemIDs.isEmpty)
-        .help(viewModel.selectedItemIDs.isEmpty ? "삭제할 항목을 선택하세요" : "선택한 항목 삭제 (⌘⌫)")
+        .help(
+            viewModel.selectedItemIDs.isEmpty
+                ? .fileBrowserToolbarDeleteEmptyHelp
+                : .fileBrowserToolbarDeleteShortcutHelp
+        )
     }
 }

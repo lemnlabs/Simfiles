@@ -96,7 +96,7 @@ nonisolated final class SimctlClient: SimctlClientProtocol, Sendable {
                 }
             }
 
-            // Booted 기기를 상단에, 그다음 런타임 역순, 이름순 정렬
+            // Sort booted devices first, then runtime descending, then by name
             result.sort { d1, d2 in
                 if d1.state.isBooted != d2.state.isBooted {
                     return d1.state.isBooted && !d2.state.isBooted

@@ -3,10 +3,11 @@ import SwiftUI
 extension View {
     func alert(
         item: Binding<AlertItem?>,
-        @ViewBuilder actions: (AlertItem) -> some View = { _ in Button("확인", role: .cancel) {} }
+        @ViewBuilder actions: (AlertItem) -> some View = { _ in Button(.commonOk, role: .cancel) {}
+        }
     ) -> some View {
         self.alert(
-            item.wrappedValue?.title ?? "",
+            item.wrappedValue.map { Text($0.title) } ?? Text(verbatim: ""),
             isPresented: Binding(
                 get: { item.wrappedValue != nil },
                 set: { isPresented in

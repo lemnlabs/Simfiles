@@ -58,9 +58,9 @@ nonisolated struct FileItem: Identifiable, Hashable, Sendable {
 
     var typeDescription: String {
         if isDirectory {
-            return "폴더"
+            return String(localized: .fileBrowserTypeFolder)
         }
-        return contentType?.localizedDescription ?? "파일"
+        return contentType?.localizedDescription ?? String(localized: .fileBrowserTypeFile)
     }
 
     var systemImageName: String {

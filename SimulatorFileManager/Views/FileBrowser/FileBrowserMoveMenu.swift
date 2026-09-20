@@ -6,7 +6,7 @@ struct FileBrowserMoveMenu: View {
 
     var body: some View {
         if !viewModel.isAtRootDirectory {
-            Button("상위 폴더로 이동") {
+            Button(.fileBrowserMoveParentFolder) {
                 viewModel.moveItems(
                     items,
                     to: viewModel.currentPathURL.deletingLastPathComponent()
@@ -15,13 +15,13 @@ struct FileBrowserMoveMenu: View {
             Divider()
         }
 
-        Button("Documents로 이동") {
+        Button(.fileBrowserMoveDocuments) {
             viewModel.moveItems(items, to: viewModel.app.documentsURL)
         }
-        Button("Library로 이동") {
+        Button(.fileBrowserMoveLibrary) {
             viewModel.moveItems(items, to: viewModel.app.libraryURL)
         }
-        Button("tmp로 이동") {
+        Button(.fileBrowserMoveTmp) {
             viewModel.moveItems(items, to: viewModel.app.tmpURL)
         }
 
@@ -31,9 +31,9 @@ struct FileBrowserMoveMenu: View {
         }
         if !availableSubfolders.isEmpty {
             Divider()
-            Menu("현재 폴더 내 서브폴더") {
+            Menu(.fileBrowserMoveSubfolders) {
                 ForEach(availableSubfolders) { subfolder in
-                    Button("'\(subfolder.name)' 폴더로 이동") {
+                    Button(.fileBrowserMoveToSubfolder(subfolder.name)) {
                         viewModel.moveItems(items, to: subfolder.url)
                     }
                 }
@@ -42,7 +42,7 @@ struct FileBrowserMoveMenu: View {
 
         Divider()
 
-        Button("폴더 선택하여 이동...") {
+        Button(.fileBrowserMoveChooseFolder) {
             viewModel.promptMove(items: items)
         }
     }

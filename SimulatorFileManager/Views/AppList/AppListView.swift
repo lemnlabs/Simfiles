@@ -24,25 +24,25 @@ struct AppListView: View {
         Group {
             if device == nil {
                 ContentUnavailableView(
-                    "시뮬레이터를 선택해 주세요.",
+                    .appListPlaceholderSelectSimulator,
                     systemImage: "ipad.landscape.and.iphone"
                 )
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if viewModel.isLoading {
                 ProgressView {
-                    Text("설치된 앱 검색 중...")
+                    Text(.appListStatusSearching)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else if viewModel.filteredApps.isEmpty {
                 ContentUnavailableView {
                     Label(
                         viewModel.filterScope == .userOnly
-                            ? "설치된 사용자 앱이 없습니다." : "앱이 없습니다.",
+                            ? .appListEmptyNoUserApps : .appListEmptyNoApps,
                         systemImage: "app.dashed"
                     )
                 } actions: {
                     if viewModel.filterScope == .userOnly {
-                        Button("전체 앱 표시하기") {
+                        Button(.appListActionShowAllApps) {
                             viewModel.filterScope = .all
                         }
                     }
@@ -76,9 +76,9 @@ struct AppListView: View {
             }
         }
         .safeAreaInset(edge: .top) {
-            Picker("필터", selection: $viewModel.filterScope) {
+            Picker(.commonFilter, selection: $viewModel.filterScope) {
                 ForEach(AppFilterScope.allCases) { scope in
-                    Text(scope.rawValue).tag(scope)
+                    Text(scope.title).tag(scope)
                 }
             }
             .pickerStyle(.segmented)
@@ -90,29 +90,29 @@ struct AppListView: View {
             ToolbarItemGroup {
                 if let device {
                     Menu {
-                        Button("Finder에서 미디어 폴더 열기") {
+                        Button(.simulatorActionShowMediaInFinder) {
                             viewModel.revealMediaFolderInFinder()
                         }
                         if device.state.isBooted {
-                            Button("사진/동영상 추가...") {
+                            Button(.simulatorActionAddMedia) {
                                 viewModel.addMediaToCurrentDevice()
                             }
                         }
                     } label: {
-                        Label("기기 미디어", systemImage: "photo.on.rectangle.angled")
+                        Label(.appListMediaMenuLabel, systemImage: "photo.on.rectangle.angled")
                     }
-                    .help("시뮬레이터 사진 및 미디어 도구")
+                    .help(.appListMediaHelp)
                 }
 
-                Button("새로고침", systemImage: "arrow.clockwise") {
+                Button(.commonRefresh, systemImage: "arrow.clockwise") {
                     reloadApps()
                 }
-                .help("앱 목록 새로고침")
+                .help(.appListActionRefreshHelp)
             }
         }
         .searchable(
             text: $viewModel.searchText,
-            prompt: "앱 이름 또는 Bundle ID 검색"
+            prompt: Text(.appListSearchPrompt)
         )
         .frame(minWidth: 240, idealWidth: 280)
         .onChange(of: device, initial: true) { _, newDevice in
@@ -127,7 +127,7 @@ struct AppListView: View {
             if let currentSelected = selectedApp,
                 viewModel.installedApps.contains(currentSelected)
             {
-                // 기존 선택 유지
+                // Preserve existing selection
             } else {
                 selectedApp = defaultApp
             }

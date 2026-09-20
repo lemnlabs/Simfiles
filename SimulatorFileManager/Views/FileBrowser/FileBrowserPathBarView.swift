@@ -7,7 +7,7 @@ struct FileBrowserPathBarView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                // 1. Finder 스타일 뒤로가기 / 앞으로가기 내비게이션 버튼
+                // 1. Finder-style back / forward navigation buttons
                 HStack(spacing: 2) {
                     Button(action: { viewModel.goBack() }) {
                         Image(systemName: "chevron.left")
@@ -17,7 +17,7 @@ struct FileBrowserPathBarView: View {
                     }
                     .buttonStyle(NavigationHistoryButtonStyle())
                     .disabled(!viewModel.canGoBack)
-                    .help("뒤로 이동 (⌘[)")
+                    .help(.fileBrowserNavBackHelp)
                     .contextMenu {
                         if !viewModel.backStack.isEmpty {
                             ForEach(
@@ -43,7 +43,7 @@ struct FileBrowserPathBarView: View {
                     }
                     .buttonStyle(NavigationHistoryButtonStyle())
                     .disabled(!viewModel.canGoForward)
-                    .help("앞으로 이동 (⌘])")
+                    .help(.fileBrowserNavForwardHelp)
                     .contextMenu {
                         if !viewModel.forwardStack.isEmpty {
                             ForEach(
@@ -65,7 +65,7 @@ struct FileBrowserPathBarView: View {
                 Divider()
                     .frame(height: 12)
 
-                // 2. Finder 스타일 브레드크럼 (Breadcrumb / Path Control)
+                // 2. Finder-style breadcrumb (Breadcrumb / Path Control)
                 ScrollView(.horizontal) {
                     HStack(spacing: 4) {
                         ForEach(Array(viewModel.pathBreadcrumbs.enumerated()), id: \.element.id) {
@@ -100,10 +100,10 @@ struct FileBrowserPathBarView: View {
                             }
                             .buttonStyle(.plain)
                             .contextMenu {
-                                Button("Finder에서 열기") {
+                                Button(.fileBrowserActionOpenInFinder) {
                                     NSWorkspace.shared.activateFileViewerSelecting([crumb.url])
                                 }
-                                Button("경로 복사") {
+                                Button(.fileBrowserActionCopyPath) {
                                     NSPasteboard.general.clearContents()
                                     NSPasteboard.general.setString(crumb.url.path, forType: .string)
                                 }

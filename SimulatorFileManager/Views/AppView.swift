@@ -52,9 +52,9 @@ struct AppView: View {
 
     private var noSelectionPlaceholderView: some View {
         ContentUnavailableView(
-            "선택된 앱이 없습니다",
+            .appSelectionEmptyTitle,
             systemImage: "folder.badge.questionmark",
-            description: Text("왼쪽 목록에서 시뮬레이터와 앱을 선택하면\n내부 파일 목록을 확인하고 파일을 넣을 수 있습니다.")
+            description: Text(.appSelectionEmptyDescription)
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

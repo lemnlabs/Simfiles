@@ -16,13 +16,13 @@ nonisolated final class AppScanner: Sendable {
         return await Task.detached(priority: .userInitiated) { () -> [InstalledApp] in
             let fileManager = FileManager.default
 
-            // 1. Bundle/Application 스캔
+            // 1. Scan Bundle/Application
             let bundleMap = self.scanBundleApplications(
                 device: device,
                 fileManager: fileManager
             )
 
-            // 2. Data/Application 스캔
+            // 2. Scan Data/Application
             let dataContainersURL = device.dataContainersURL
             guard
                 let dataEntries = try? fileManager.contentsOfDirectory(
@@ -84,7 +84,7 @@ nonisolated final class AppScanner: Sendable {
                 apps.append(app)
             }
 
-            // 사용자 앱 우선, 그다음 앱 이름순 정렬
+            // Sort user apps first, then alphabetically by app name
             apps.sort { a1, a2 in
                 if a1.isSystemApp != a2.isSystemApp {
                     return !a1.isSystemApp && a2.isSystemApp
@@ -122,7 +122,7 @@ nonisolated final class AppScanner: Sendable {
                 continue
             }
 
-            // .app 번들 디렉토리 찾기
+            // Find .app bundle directory
             guard let appURL = subItems.first(where: { $0.pathExtension == "app" }) else {
                 continue
             }
@@ -178,7 +178,7 @@ nonisolated final class AppScanner: Sendable {
             candidateNames.append(iconFile)
         }
 
-        // 디렉토리 내의 AppIcon*.png 파일들 검색
+        // Search AppIcon*.png files in directory
         if let appContents = try? fileManager.contentsOfDirectory(
             at: appURL, includingPropertiesForKeys: nil)
         {

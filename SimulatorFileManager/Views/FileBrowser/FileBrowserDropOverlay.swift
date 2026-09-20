@@ -18,7 +18,7 @@ struct FileBrowserDropOverlay: View {
                     .font(.largeTitle)
                     .foregroundStyle(.tint)
 
-                Text("이 폴더로 파일 복사")
+                Text(.fileBrowserDropOverlayText)
                     .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundStyle(.tint)

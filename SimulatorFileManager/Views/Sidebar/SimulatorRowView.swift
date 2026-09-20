@@ -34,46 +34,46 @@ struct SimulatorRowView: View {
                 Circle()
                     .fill(.green)
                     .frame(width: 7, height: 7)
-                    .help("부팅됨 (Booted)")
+                    .help(.simulatorStatusBooted)
             }
         }
         .padding(.vertical, 2)
         .contextMenu {
             if device.state.isBooted {
-                Button("시뮬레이터 종료 (Shutdown)") {
+                Button(.simulatorActionShutdown) {
                     onShutdown()
                 }
             } else {
-                Button("시뮬레이터 부팅 (Boot)") {
+                Button(.simulatorActionBoot) {
                     onBoot()
                 }
             }
 
-            Button("\(runnerAppName)에서 열기") {
+            Button(.simulatorActionOpenInApp(runnerAppName)) {
                 onOpenSimulator()
             }
 
             Divider()
 
-            Button("Finder에서 기기 폴더 보기") {
+            Button(.simulatorActionShowInFinder) {
                 onRevealInFinder()
             }
 
             if let onRevealMediaFolder {
-                Button("미디어(사진) 폴더 보기") {
+                Button(.simulatorActionShowMediaInFinder) {
                     onRevealMediaFolder()
                 }
             }
 
             if device.state.isBooted, let onAddMedia {
-                Button("사진/동영상 추가...") {
+                Button(.simulatorActionAddMedia) {
                     onAddMedia()
                 }
             }
 
             Divider()
 
-            Button("UDID 복사") {
+            Button(.simulatorActionCopyUDID) {
                 if let onCopyUDID {
                     onCopyUDID()
                 } else {

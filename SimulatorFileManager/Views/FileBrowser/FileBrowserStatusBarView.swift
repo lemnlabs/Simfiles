@@ -9,21 +9,31 @@ struct FileBrowserStatusBarView: View {
     var body: some View {
         HStack(spacing: 8) {
             if selectedCount == 0 {
-                Text("\(totalCount)개 항목")
+                Text(.fileBrowserStatusTotalItems(totalCount))
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
-            } else {
-                let sizeText: Text = Text(
-                    selectedTotalSize > 0 ? " (\(formattedSelectedSize))" : ""
+            } else if selectedTotalSize > 0 {
+                Text(
+                    .fileBrowserStatusSelectedItemsWithSize(
+                        selectedCount,
+                        totalCount,
+                        formattedSelectedSize
+                    )
                 )
-                .font(.caption.monospaced())
+                .font(.caption)
                 .foregroundStyle(.secondary)
-
-                Text("\(totalCount)개 항목 중 \(selectedCount)개 선택됨\(sizeText)")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                .lineLimit(1)
+            } else {
+                Text(
+                    .fileBrowserStatusSelectedItems(
+                        selectedCount,
+                        totalCount
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
             }
 
             Spacer()

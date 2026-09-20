@@ -127,11 +127,11 @@ final class FileBrowserViewModel {
         simulatorManager?.isAppRunning(device: device, bundleId: app.bundleId) ?? false
     }
 
-    var deleteConfirmationTitle: String {
+    var deleteConfirmationTitle: LocalizedStringResource {
         if itemsPendingDeletion.count == 1 {
-            return "'\(itemsPendingDeletion.first?.name ?? "")' 항목을 삭제하시겠습니까?"
+            return .fileBrowserDeleteConfirmSingle(itemsPendingDeletion.first?.name ?? "")
         } else {
-            return "\(itemsPendingDeletion.count)개 항목을 삭제하시겠습니까?"
+            return .fileBrowserDeleteConfirmMultiple(itemsPendingDeletion.count)
         }
     }
 
@@ -400,7 +400,9 @@ final class FileBrowserViewModel {
             }
             reloadFiles()
         } catch {
-            showError("붙여넣기 실패: \(error.localizedDescription)")
+            showError(
+                String(localized: .fileBrowserErrorPasteFailed(error.localizedDescription))
+            )
         }
     }
 
@@ -424,7 +426,9 @@ final class FileBrowserViewModel {
             selectedItemIDs.subtract(items.map(\.id))
             reloadFiles()
         } catch {
-            showError("삭제 실패: \(error.localizedDescription)")
+            showError(
+                String(localized: .fileBrowserErrorDeleteFailed(error.localizedDescription))
+            )
         }
     }
 
@@ -442,7 +446,9 @@ final class FileBrowserViewModel {
             newFolderName = ""
             reloadFiles()
         } catch {
-            showError("폴더 생성 실패: \(error.localizedDescription)")
+            showError(
+                String(localized: .fileBrowserErrorCreateFolderFailed(error.localizedDescription))
+            )
         }
     }
 
@@ -453,7 +459,9 @@ final class FileBrowserViewModel {
             selectedItemIDs.removeAll()
             reloadFiles()
         } catch {
-            showError("이동 실패: \(error.localizedDescription)")
+            showError(
+                String(localized: .fileBrowserErrorMoveFailed(error.localizedDescription))
+            )
         }
     }
 
@@ -464,7 +472,7 @@ final class FileBrowserViewModel {
         panel.canChooseDirectories = true
         panel.canCreateDirectories = true
         panel.allowsMultipleSelection = false
-        panel.prompt = "여기로 이동"
+        panel.prompt = String(localized: .fileBrowserPanelMoveHere)
         panel.directoryURL = currentPathURL
 
         if panel.runModal() == .OK, let destination = panel.url {
@@ -489,14 +497,16 @@ final class FileBrowserViewModel {
         panel.canChooseFiles = true
         panel.canChooseDirectories = true
         panel.allowsMultipleSelection = true
-        panel.prompt = "가져오기"
+        panel.prompt = String(localized: .fileBrowserPanelImport)
 
         if panel.runModal() == .OK {
             do {
                 try fileService.importFiles(from: panel.urls, to: currentPathURL)
                 reloadFiles()
             } catch {
-                showError("파일 복사 실패: \(error.localizedDescription)")
+                showError(
+                    String(localized: .fileBrowserErrorCopyFailed(error.localizedDescription))
+                )
             }
         }
     }
@@ -507,14 +517,17 @@ final class FileBrowserViewModel {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = true
         panel.allowedContentTypes = [.image, .movie, .video]
-        panel.prompt = "사진 앨범에 추가"
+        panel.prompt = String(localized: .fileBrowserPanelAddToPhotos)
 
         if panel.runModal() == .OK {
             Task {
                 do {
                     try await simctlClient.addMedia(udid: device.udid, mediaURLs: panel.urls)
                 } catch {
-                    showError("미디어 추가 실패: \(error.localizedDescription)")
+                    showError(
+                        String(
+                            localized: .fileBrowserErrorAddMediaFailed(error.localizedDescription))
+                    )
                 }
             }
         }
@@ -555,7 +568,9 @@ final class FileBrowserViewModel {
                 }
                 reloadFiles()
             } catch {
-                showError("파일 처리 실패: \(error.localizedDescription)")
+                showError(
+                    String(localized: .fileBrowserErrorProcessFailed(error.localizedDescription))
+                )
             }
         }
 

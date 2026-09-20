@@ -11,7 +11,7 @@ struct FileBrowserTableView: View {
             selection: $viewModel.selectedItemIDs,
             sortOrder: $viewModel.sortOrder
         ) {
-            TableColumn("이름", value: \.name) { item in
+            TableColumn(.fileBrowserTableColumnName, value: \.name) { item in
                 HStack(spacing: 8) {
                     Image(systemName: item.systemImageName)
                         .foregroundStyle(item.iconColor)
@@ -39,21 +39,21 @@ struct FileBrowserTableView: View {
             }
             .width(min: 200, ideal: 300)
 
-            TableColumn("종류", value: \.typeDescription) { item in
+            TableColumn(.fileBrowserTableColumnKind, value: \.typeDescription) { item in
                 Text(item.typeDescription)
                     .font(.body)
                     .foregroundStyle(.secondary)
             }
             .width(min: 80, ideal: 110, max: 150)
 
-            TableColumn("크기", value: \.size) { item in
+            TableColumn(.fileBrowserTableColumnSize, value: \.size) { item in
                 Text(item.formattedSize)
                     .font(.body.monospaced())
                     .foregroundStyle(.secondary)
             }
             .width(min: 60, ideal: 80, max: 100)
 
-            TableColumn("수정일", value: \.sortableDate) { item in
+            TableColumn(.fileBrowserTableColumnDateModified, value: \.sortableDate) { item in
                 Text(item.formattedDate)
                     .font(.body)
                     .foregroundStyle(.secondary)
@@ -68,22 +68,22 @@ struct FileBrowserTableView: View {
         let count = targets.count
 
         if count == 1, let single = targets.first {
-            Button("열기") {
+            Button(.commonOpen) {
                 viewModel.handleDoubleClick(on: single)
             }
             if !single.isDirectory {
-                Button("미리보기 (Quick Look)") {
+                Button(.fileBrowserActionQuickLook) {
                     viewModel.previewURL = single.url
                 }
             }
         }
 
-        Button(count == 1 ? "Finder에서 보기" : "\(count)개 항목 Finder에서 보기") {
+        Button(.fileBrowserActionShowInFinderCount(count)) {
             viewModel.revealInFinder(items: targets)
         }
 
         if count == 1, let single = targets.first, single.isDirectory {
-            Button("터미널에서 열기") {
+            Button(.fileBrowserActionOpenInTerminal) {
                 let terminalURL = URL(
                     fileURLWithPath: "/System/Applications/Utilities/Terminal.app")
                 NSWorkspace.shared.open(
@@ -94,20 +94,20 @@ struct FileBrowserTableView: View {
 
         Divider()
 
-        Button(count == 1 ? "경로 복사" : "\(count)개 항목 경로 복사") {
+        Button(.fileBrowserActionCopyPathCount(count)) {
             viewModel.copyPaths(for: targets)
         }
 
-        Button(count == 1 ? "복사" : "\(count)개 항목 복사") {
+        Button(.fileBrowserActionCopyItemCount(count)) {
             viewModel.copyItems(targets)
         }
 
-        Button(count == 1 ? "잘라내기 (이동)" : "\(count)개 항목 잘라내기 (이동)") {
+        Button(.fileBrowserActionCutItemCount(count)) {
             viewModel.cutItems(targets)
         }
 
         if !viewModel.clipboardService.isEmpty {
-            Button("여기에 붙여넣기 (\(viewModel.clipboardService.count)개)") {
+            Button(.fileBrowserActionPasteHereCount(viewModel.clipboardService.count)) {
                 viewModel.pasteClipboard(
                     to: item.isDirectory ? item.url : viewModel.currentPathURL
                 )
@@ -116,14 +116,14 @@ struct FileBrowserTableView: View {
 
         Divider()
 
-        Menu(count == 1 ? "이동..." : "\(count)개 항목 이동...") {
+        Menu(.fileBrowserActionMoveMenuCount(count)) {
             FileBrowserMoveMenu(viewModel: viewModel, items: targets)
         }
 
         Divider()
 
         Button(
-            count == 1 ? "삭제 (휴지통으로 이동)" : "\(count)개 항목 삭제 (휴지통으로 이동)",
+            .fileBrowserActionMoveToTrashCount(count),
             role: .destructive
         ) {
             viewModel.confirmDelete(items: targets)

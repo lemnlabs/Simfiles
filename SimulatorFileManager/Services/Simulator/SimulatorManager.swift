@@ -37,7 +37,9 @@ final class SimulatorManager {
             try await simctlClient.bootDevice(udid: device.udid)
             await fetchDevices()
         } catch {
-            self.errorMessage = "시뮬레이터 부팅 실패: \(error.localizedDescription)"
+            self.errorMessage = String(
+                localized: .simulatorErrorBootFailed(error.localizedDescription)
+            )
         }
     }
 
@@ -46,7 +48,9 @@ final class SimulatorManager {
             try await simctlClient.shutdownDevice(udid: device.udid)
             await fetchDevices()
         } catch {
-            self.errorMessage = "시뮬레이터 종료 실패: \(error.localizedDescription)"
+            self.errorMessage = String(
+                localized: .simulatorErrorShutdownFailed(error.localizedDescription)
+            )
         }
     }
 
@@ -77,7 +81,9 @@ final class SimulatorManager {
             try await simctlClient.launchApp(udid: device.udid, bundleId: bundleId)
             _ = await fetchRunningAppBundleIds(for: device)
         } catch {
-            self.errorMessage = "앱 실행 실패: \(error.localizedDescription)"
+            self.errorMessage = String(
+                localized: .simulatorErrorLaunchFailed(error.localizedDescription)
+            )
         }
     }
 
@@ -86,7 +92,9 @@ final class SimulatorManager {
             try await simctlClient.terminateApp(udid: device.udid, bundleId: bundleId)
             _ = await fetchRunningAppBundleIds(for: device)
         } catch {
-            self.errorMessage = "앱 종료 실패: \(error.localizedDescription)"
+            self.errorMessage = String(
+                localized: .simulatorErrorTerminateFailed(error.localizedDescription)
+            )
         }
     }
 
