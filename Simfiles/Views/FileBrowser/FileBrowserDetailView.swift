@@ -86,8 +86,15 @@ struct FileBrowserDetailView: View {
                     viewModel.goForward()
                     return .handled
                 }
-                if press.key == .upArrow && !viewModel.isAtRootDirectory {
+                if press.key == .upArrow && viewModel.canNavigateToParent {
                     viewModel.navigateToParent()
+                    return .handled
+                }
+                if press.key == .downArrow,
+                    let first = viewModel.selectedFiles.first,
+                    viewModel.selectedFiles.count == 1
+                {
+                    viewModel.handleDoubleClick(on: first)
                     return .handled
                 }
             }

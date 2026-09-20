@@ -140,10 +140,13 @@ final class FileBrowserViewModel {
         return items
     }
 
-    /// `true` if the browser is currently at the base directory for the selected sandbox scope.
+    /// `true` if the browser is currently at the root sandbox directory (`app.dataURL`).
     var isAtRootDirectory: Bool {
-        let base = baseDirectory(for: selectedDirectory)
-        return currentPathURL.standardizedFileURL.path == base.standardizedFileURL.path
+        let currentPath = currentPathURL.standardizedFileURL.path
+        let rootPath = app.dataURL.standardizedFileURL.path
+        guard currentPath != rootPath else { return true }
+        let rootPrefix = rootPath.hasSuffix("/") ? rootPath : rootPath + "/"
+        return !currentPath.hasPrefix(rootPrefix)
     }
 
     /// `true` if previous navigation history is available.
@@ -154,6 +157,11 @@ final class FileBrowserViewModel {
     /// `true` if forward navigation history is available.
     var canGoForward: Bool {
         !forwardStack.isEmpty
+    }
+
+    /// `true` if the browser can navigate up to a parent folder within the sandbox.
+    var canNavigateToParent: Bool {
+        !isAtRootDirectory
     }
 
     /// A clean relative path string displayed in the path bar (e.g., `/Documents/subfolder`).
@@ -196,33 +204,23 @@ final class FileBrowserViewModel {
     /// Interactive hierarchical breadcrumb items representing the current path segments.
     var pathBreadcrumbs: [PathBreadcrumb] {
         let currentStandardized = currentPathURL.standardizedFileURL.path
+        let rootDir = app.dataURL
+        let rootStandardized = rootDir.standardizedFileURL.path
+        let rootPrefix = rootStandardized.hasSuffix("/") ? rootStandardized : rootStandardized + "/"
 
-        let baseDir: URL
-        let rootTitle: String
-
-        if currentStandardized.hasPrefix(app.documentsURL.standardizedFileURL.path) {
-            baseDir = app.documentsURL
-            rootTitle = SandboxDirectory.documents.rawValue
-        } else if currentStandardized.hasPrefix(app.libraryURL.standardizedFileURL.path) {
-            baseDir = app.libraryURL
-            rootTitle = SandboxDirectory.library.rawValue
-        } else if currentStandardized.hasPrefix(app.tmpURL.standardizedFileURL.path) {
-            baseDir = app.tmpURL
-            rootTitle = SandboxDirectory.tmp.rawValue
-        } else {
-            baseDir = app.dataURL
-            rootTitle = SandboxDirectory.root.rawValue
+        guard currentStandardized == rootStandardized || currentStandardized.hasPrefix(rootPrefix)
+        else {
+            return [PathBreadcrumb(title: currentPathURL.lastPathComponent, url: currentPathURL)]
         }
 
         var crumbs: [PathBreadcrumb] = [
-            PathBreadcrumb(title: rootTitle, url: baseDir)
+            PathBreadcrumb(title: SandboxDirectory.root.rawValue, url: rootDir)
         ]
 
-        let basePath = baseDir.standardizedFileURL.path
-        if currentStandardized.hasPrefix(basePath) && currentStandardized != basePath {
-            let relative = String(currentStandardized.dropFirst(basePath.count))
+        if currentStandardized != rootStandardized {
+            let relative = String(currentStandardized.dropFirst(rootPrefix.count))
             let components = relative.split(separator: "/").map(String.init)
-            var accumulated = baseDir
+            var accumulated = rootDir
             for component in components {
                 accumulated = accumulated.appendingPathComponent(component)
                 crumbs.append(PathBreadcrumb(title: component, url: accumulated))

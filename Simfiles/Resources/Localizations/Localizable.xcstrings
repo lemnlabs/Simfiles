@@ -1663,6 +1663,24 @@
         }
       }
     },
+    "fileBrowser.nav.parentHelp" : {
+      "comment" : "Navigation parent folder button tooltip",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enclosing Folder (⌘↑)"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "상위 폴더 (⌘↑)"
+          }
+        }
+      }
+    },
     "fileBrowser.newFolder.namePlaceholder" : {
       "comment" : "Text field prompt in new folder dialog",
       "extractionState" : "manual",

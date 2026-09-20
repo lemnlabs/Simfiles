@@ -14,7 +14,7 @@ struct FileBrowserPathBarView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                // 1. Finder-style back / forward navigation buttons
+                // 1. Finder-style back / forward / parent navigation buttons
                 HStack(spacing: 2) {
                     Button(action: { viewModel.goBack() }) {
                         Image(systemName: "chevron.left")
@@ -24,6 +24,7 @@ struct FileBrowserPathBarView: View {
                     }
                     .buttonStyle(NavigationHistoryButtonStyle())
                     .disabled(!viewModel.canGoBack)
+                    .keyboardShortcut("[", modifiers: .command)
                     .help(.fileBrowserNavBackHelp)
                     .contextMenu {
                         if !viewModel.backStack.isEmpty {
@@ -50,6 +51,7 @@ struct FileBrowserPathBarView: View {
                     }
                     .buttonStyle(NavigationHistoryButtonStyle())
                     .disabled(!viewModel.canGoForward)
+                    .keyboardShortcut("]", modifiers: .command)
                     .help(.fileBrowserNavForwardHelp)
                     .contextMenu {
                         if !viewModel.forwardStack.isEmpty {
@@ -67,6 +69,17 @@ struct FileBrowserPathBarView: View {
                             }
                         }
                     }
+
+                    Button(action: { viewModel.navigateToParent() }) {
+                        Image(systemName: "chevron.up")
+                            .font(.caption.weight(.semibold))
+                            .frame(width: 22, height: 20)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(NavigationHistoryButtonStyle())
+                    .disabled(viewModel.isAtRootDirectory)
+                    .keyboardShortcut(.upArrow, modifiers: .command)
+                    .help(.fileBrowserNavParentHelp)
                 }
 
                 Divider()
@@ -90,8 +103,7 @@ struct FileBrowserPathBarView: View {
                             }) {
                                 HStack(spacing: 4) {
                                     Image(
-                                        systemName: index == 0
-                                            ? iconForSandbox(crumb.title) : "folder.fill"
+                                        systemName: iconForSandbox(crumb.title)
                                     )
                                     .font(.caption)
                                     .foregroundStyle(
@@ -136,6 +148,7 @@ struct FileBrowserPathBarView: View {
         case SandboxDirectory.documents.rawValue: return "doc.on.doc.fill"
         case SandboxDirectory.library.rawValue: return "books.vertical.fill"
         case SandboxDirectory.tmp.rawValue: return "clock.arrow.circlepath"
+        case SandboxDirectory.root.rawValue: return "shippingbox.fill"
         default: return "folder.fill"
         }
     }
