@@ -8,18 +8,69 @@
 import AppKit
 import Foundation
 
+/// Defines low-level operations for communicating with Xcode simulators via `simctl`.
 protocol SimctlClientProtocol: Sendable {
+    /// Retrieves a list of available simulator devices installed on the system.
+    ///
+    /// - Returns: An array of ``SimulatorDevice`` instances sorted by boot state, runtime, and name.
+    /// - Throws: An `NSError` if the underlying `xcrun simctl` command fails.
     func listDevices() async throws -> [SimulatorDevice]
+
+    /// Boots the simulator device identified by the given UDID.
+    ///
+    /// - Parameter udid: The unique device identifier of the target simulator.
+    /// - Throws: An `NSError` if the simulator fails to boot.
     func bootDevice(udid: String) async throws
+
+    /// Shuts down the simulator device identified by the given UDID.
+    ///
+    /// - Parameter udid: The unique device identifier of the target simulator.
+    /// - Throws: An `NSError` if the shutdown command fails.
     func shutdownDevice(udid: String) async throws
+
+    /// Fetches the bundle identifiers of user applications currently running on the specified booted simulator.
+    ///
+    /// - Parameter udid: The unique device identifier of the booted target simulator.
+    /// - Returns: A set of bundle identifiers currently active on the simulator.
+    /// - Throws: An `NSError` if querying the process list fails.
     func fetchRunningAppBundleIds(udid: String) async throws -> Set<String>
+
+    /// Launches an application with the specified bundle identifier on the target simulator.
+    ///
+    /// - Parameters:
+    ///   - udid: The unique device identifier of the target simulator.
+    ///   - bundleId: The bundle identifier of the application to launch.
+    /// - Throws: An `NSError` if the application fails to launch.
     func launchApp(udid: String, bundleId: String) async throws
+
+    /// Terminates the running application with the specified bundle identifier on the target simulator.
+    ///
+    /// - Parameters:
+    ///   - udid: The unique device identifier of the target simulator.
+    ///   - bundleId: The bundle identifier of the application to terminate.
+    /// - Throws: An `NSError` if termination fails.
     func terminateApp(udid: String, bundleId: String) async throws
+
+    /// Adds photo or video media files to the simulator's photo library.
+    ///
+    /// - Parameters:
+    ///   - udid: The unique device identifier of the target simulator.
+    ///   - mediaURLs: File URLs of the media files to inject.
+    /// - Throws: An `NSError` if `simctl addmedia` exits with a non-zero status.
     func addMedia(udid: String, mediaURLs: [URL]) async throws
+
+    /// Opens the official Simulator.app or Device Hub application on macOS.
+    ///
+    /// - Parameter udid: An optional device UDID to bring to focus upon opening.
     func openSimulatorApp(for udid: String?)
+
+    /// Returns the localized display name of the simulator runner app (`Simulator` or `Device Hub`).
     var runnerAppName: String { get }
 }
 
+/// Communicates directly with the `xcrun simctl` command-line utility.
+///
+/// Executes background CLI tasks via `Task.detached` to avoid blocking the caller's execution thread.
 nonisolated final class SimctlClient: SimctlClientProtocol, Sendable {
     init() {}
 

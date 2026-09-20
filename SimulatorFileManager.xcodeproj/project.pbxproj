@@ -6,8 +6,13 @@
 	objectVersion = 90;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		E35FA625305F803000A45E21 /* Documentation.docc in Sources */ = {isa = PBXBuildFile; fileRef = E35FA624305F803000A45E21 /* Documentation.docc */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* SimulatorFileManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SimulatorFileManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E35FA624305F803000A45E21 /* Documentation.docc */ = {isa = PBXFileReference; lastKnownFileType = folder.documentationcatalog; path = Documentation.docc; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -30,6 +35,7 @@
 		000000000000000000000001 = {
 			isa = PBXGroup;
 			children = (
+				E35FA624305F803000A45E21 /* Documentation.docc */,
 				000000000000000000000010 /* SimulatorFileManager */,
 				000000000000000000000020 /* Products */,
 			);
@@ -111,6 +117,7 @@
 		000000000000000120000000 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			files = (
+				E35FA625305F803000A45E21 /* Documentation.docc in Sources */,
 			);
 		};
 /* End PBXSourcesBuildPhase section */

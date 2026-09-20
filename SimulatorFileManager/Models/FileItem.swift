@@ -9,13 +9,26 @@ import Foundation
 import SwiftUI
 import UniformTypeIdentifiers
 
+/// Represents a single file or directory item within a simulator sandbox folder.
 nonisolated struct FileItem: Identifiable, Hashable, Sendable {
     var id: String { url.path }
+
+    /// The absolute filesystem URL of this item.
     let url: URL
+
+    /// The display filename or directory name.
     let name: String
+
+    /// `true` if the item is a directory.
     let isDirectory: Bool
+
+    /// File size in bytes (0 for directories).
     let size: Int64
+
+    /// The date and time when the file content was last modified.
     let modificationDate: Date?
+
+    /// The resolved uniform type identifier (`UTType`) of the item.
     let contentType: UTType?
 
     init(

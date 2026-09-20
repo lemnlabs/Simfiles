@@ -7,10 +7,18 @@
 
 import Foundation
 
+/// Standard application container sandbox directories accessible for browsing.
 enum SandboxDirectory: String, CaseIterable, Identifiable, Sendable {
+    /// The user-visible persistent document storage (`Documents`).
     case documents = "Documents"
+
+    /// The app-private support and configuration directory (`Library`).
     case library = "Library"
+
+    /// Temporary files that may be purged by the system (`tmp`).
     case tmp = "tmp"
+
+    /// The root data container folder encompassing all sandbox subdirectories.
     case root = "Root"
 
     var id: String { rawValue }

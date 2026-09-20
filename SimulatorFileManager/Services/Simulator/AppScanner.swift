@@ -8,9 +8,14 @@
 import AppKit
 import Foundation
 
+/// Scans the file system of a simulator device to locate installed applications and their sandbox containers.
+///
+/// Discovers both user-installed applications and system applications by inspecting
+/// `Containers/Bundle/Application` and `Containers/Data/Application` directories.
 nonisolated final class AppScanner: Sendable {
     init() {}
 
+    /// Internal metadata representing an application's bundle content.
     nonisolated struct AppBundleInfo: Sendable {
         let bundleId: String
         let displayName: String
@@ -19,6 +24,13 @@ nonisolated final class AppScanner: Sendable {
         let iconData: Data?
     }
 
+    /// Scans installed applications for the specified simulator device.
+    ///
+    /// Reads container metadata plists (`.com.apple.mobile_container_manager.metadata.plist`)
+    /// and resolves corresponding `.app` bundles to extract display names, versions, and icons.
+    ///
+    /// - Parameter device: The simulator device whose installed applications should be scanned.
+    /// - Returns: An array of ``InstalledApp`` models sorted with user apps first, followed alphabetically by display name.
     func scanInstalledApps(for device: SimulatorDevice) async -> [InstalledApp] {
         return await Task.detached(priority: .userInitiated) { () -> [InstalledApp] in
             let fileManager = FileManager.default

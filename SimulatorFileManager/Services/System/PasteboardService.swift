@@ -8,11 +8,20 @@
 import AppKit
 import Foundation
 
+/// Abstraction for writing text content into the macOS system pasteboard.
 protocol PasteboardServiceProtocol: Sendable {
+    /// Copies a single string to the general pasteboard.
+    ///
+    /// - Parameter string: The text string to copy.
     func copyString(_ string: String)
+
+    /// Copies multiple strings joined by newlines to the general pasteboard.
+    ///
+    /// - Parameter strings: An array of strings to copy.
     func copyStrings(_ strings: [String])
 }
 
+/// Provides system pasteboard access using `NSPasteboard.general`.
 nonisolated final class PasteboardService: PasteboardServiceProtocol, Sendable {
     init() {}
 

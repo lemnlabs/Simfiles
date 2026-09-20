@@ -10,35 +10,65 @@ import Foundation
 import Observation
 import UniformTypeIdentifiers
 
+/// Manages directory navigation, file manipulation, real-time monitoring, and clipboard operations for a selected app's sandbox.
 @Observable
 @MainActor
 final class FileBrowserViewModel {
+    /// The parent simulator device.
     let device: SimulatorDevice
+
+    /// The application whose sandbox files are currently displayed.
     let app: InstalledApp
 
+    /// The selected standard sandbox shortcut category (Documents, Library, tmp, Root).
     var selectedDirectory: SandboxDirectory = .root
+
+    /// The absolute URL of the directory currently being viewed.
     var currentPathURL: URL
+
     private(set) var backStack: [URL] = []
     private(set) var forwardStack: [URL] = []
     private let maxHistoryCount = 50
+
+    /// The items contained directly inside the current directory.
     var fileItems: [FileItem] = []
+
+    /// Identifiers of currently selected items in the file table.
     var selectedItemIDs: Set<FileItem.ID> = []
+
+    /// `true` when a drag operation is hovering over the file browser view.
     var isTargetedForDrop: Bool = false
+
+    /// URL of the item currently being previewed via Quick Look.
     var previewURL: URL? = nil
 
+    /// Flag controlling visibility of the error alert.
     var showingError: Bool = false
+
+    /// The error message displayed in the error alert.
     var errorMessage: String = ""
 
+    /// Flag controlling visibility of the create new folder modal dialog.
     var showingNewFolderDialog: Bool = false
+
+    /// Input text binding for naming a new folder.
     var newFolderName: String = ""
 
+    /// Flag controlling the delete confirmation modal.
     var showingDeleteConfirmation: Bool = false
+
+    /// Items targeted for deletion while awaiting user confirmation.
     var itemsPendingDeletion: [FileItem] = []
 
+    /// Indicates whether an app launch or terminate action is running.
     var isPerformingAppAction: Bool = false
+
+    /// Active sort descriptor list for table columns.
     var sortOrder: [KeyPathComparator<FileItem>] = [
         KeyPathComparator(\.name, order: .forward)
     ]
+
+    /// When true, directories are always displayed before regular files regardless of column sort order.
     var foldersAlwaysOnTop: Bool = true
 
     let fileService: FileManagerServiceProtocol
@@ -49,6 +79,9 @@ final class FileBrowserViewModel {
     private let workspaceService: WorkspaceServiceProtocol
     private let pasteboardService: PasteboardServiceProtocol
 
+    /// Initializes a file browser view model for the specified device and application.
+    ///
+    /// Starts live directory monitoring and initiates initial file loading.
     init(
         device: SimulatorDevice,
         app: InstalledApp,
@@ -77,18 +110,22 @@ final class FileBrowserViewModel {
 
     // MARK: - Computed Properties
 
+    /// The file items currently selected in the table.
     var selectedFiles: [FileItem] {
         fileItems.filter { selectedItemIDs.contains($0.id) }
     }
 
+    /// Total cumulative byte size of all selected regular files.
     var selectedTotalSize: Int64 {
         selectedFiles.reduce(0) { $0 + ($1.isDirectory ? 0 : $1.size) }
     }
 
+    /// Human-readable formatted string representing the selected file size total.
     var formattedSelectedSize: String {
         ByteCountFormatter.string(fromByteCount: selectedTotalSize, countStyle: .file)
     }
 
+    /// File items sorted by the active sort descriptor and directory precedence.
     var sortedFileItems: [FileItem] {
         var items = fileItems
         items.sort(using: sortOrder)
@@ -103,19 +140,23 @@ final class FileBrowserViewModel {
         return items
     }
 
+    /// `true` if the browser is currently at the base directory for the selected sandbox scope.
     var isAtRootDirectory: Bool {
         let base = baseDirectory(for: selectedDirectory)
         return currentPathURL.standardizedFileURL.path == base.standardizedFileURL.path
     }
 
+    /// `true` if previous navigation history is available.
     var canGoBack: Bool {
         !backStack.isEmpty
     }
 
+    /// `true` if forward navigation history is available.
     var canGoForward: Bool {
         !forwardStack.isEmpty
     }
 
+    /// A clean relative path string displayed in the path bar (e.g., `/Documents/subfolder`).
     var currentRelativePath: String {
         let base = baseDirectory(for: selectedDirectory)
         let basePath = base.standardizedFileURL.path
@@ -130,6 +171,7 @@ final class FileBrowserViewModel {
         return currPath
     }
 
+    /// `true` if the application process is running on the target simulator.
     var isAppRunning: Bool {
         simulatorManager?.isAppRunning(device: device, bundleId: app.bundleId) ?? false
     }
@@ -144,12 +186,14 @@ final class FileBrowserViewModel {
 
     // MARK: - Navigation
 
+    /// An element in the interactive breadcrumb bar.
     struct PathBreadcrumb: Identifiable, Hashable {
         var id: String { url.path }
         let title: String
         let url: URL
     }
 
+    /// Interactive hierarchical breadcrumb items representing the current path segments.
     var pathBreadcrumbs: [PathBreadcrumb] {
         let currentStandardized = currentPathURL.standardizedFileURL.path
 
@@ -187,6 +231,7 @@ final class FileBrowserViewModel {
         return crumbs
     }
 
+    /// Resolves the base URL for the given standard sandbox directory.
     func baseDirectory(for dir: SandboxDirectory) -> URL {
         switch dir {
         case .documents: return app.documentsURL
@@ -196,12 +241,18 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Switches the browser view directly to a predefined sandbox directory.
+    ///
+    /// - Parameter dir: The destination standard sandbox folder.
     func switchDirectory(to dir: SandboxDirectory) {
         selectedDirectory = dir
         let targetURL = baseDirectory(for: dir)
         navigateToURL(targetURL)
     }
 
+    /// Navigates to a specific directory URL and records navigation history.
+    ///
+    /// - Parameter url: The target directory URL.
     func navigateToURL(_ url: URL) {
         let targetPath = url.standardizedFileURL.path
         guard targetPath != currentPathURL.standardizedFileURL.path else { return }
@@ -214,6 +265,7 @@ final class FileBrowserViewModel {
         applyNavigation(to: url)
     }
 
+    /// Navigates back one step in the browser history.
     func goBack() {
         guard canGoBack else { return }
         let previousURL = backStack.removeLast()
@@ -224,6 +276,7 @@ final class FileBrowserViewModel {
         applyNavigation(to: previousURL)
     }
 
+    /// Navigates forward one step in the browser history.
     func goForward() {
         guard canGoForward else { return }
         let nextURL = forwardStack.removeLast()
@@ -234,6 +287,9 @@ final class FileBrowserViewModel {
         applyNavigation(to: nextURL)
     }
 
+    /// Navigates back to an arbitrary history entry in the back stack.
+    ///
+    /// - Parameter index: Target index in `backStack`.
     func navigateBack(to index: Int) {
         guard index >= 0 && index < backStack.count else { return }
         let targetURL = backStack[index]
@@ -248,6 +304,9 @@ final class FileBrowserViewModel {
         applyNavigation(to: targetURL)
     }
 
+    /// Navigates forward to an arbitrary history entry in the forward stack.
+    ///
+    /// - Parameter index: Target index in `forwardStack`.
     func navigateForward(to index: Int) {
         guard index >= 0 && index < forwardStack.count else { return }
         let targetURL = forwardStack[index]
@@ -262,12 +321,14 @@ final class FileBrowserViewModel {
         applyNavigation(to: targetURL)
     }
 
+    /// Navigates upward to the parent directory unless already at the root.
     func navigateToParent() {
         guard !isAtRootDirectory else { return }
         let parentURL = currentPathURL.deletingLastPathComponent()
         navigateToURL(parentURL)
     }
 
+    /// Clears both back and forward history stacks.
     func clearHistory() {
         backStack.removeAll()
         forwardStack.removeAll()
@@ -323,6 +384,7 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Toggles the Quick Look panel for the first selected non-directory file item.
     func toggleQuickLook() {
         if previewURL != nil {
             previewURL = nil
@@ -331,10 +393,12 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Copies the current directory's file system path to the system pasteboard.
     func copyCurrentPath() {
         pasteboardService.copyString(currentPathURL.path)
     }
 
+    /// Opens macOS Terminal at the current directory location.
     func openInTerminal() {
         let terminalURL = URL(fileURLWithPath: "/System/Applications/Utilities/Terminal.app")
         NSWorkspace.shared.open(
@@ -345,6 +409,7 @@ final class FileBrowserViewModel {
         )
     }
 
+    /// Reloads the directory contents from disk and discards stale selection identifiers.
     func reloadFiles() {
         fileItems = fileService.listFiles(at: currentPathURL)
         let validIDs = Set(fileItems.map(\.id))
@@ -362,14 +427,19 @@ final class FileBrowserViewModel {
         startMonitoring()
     }
 
+    /// Starts observing filesystem modification events on `currentPathURL`.
     func startMonitoring() {
         directoryMonitor.startMonitoring(url: currentPathURL)
     }
 
+    /// Stops observing filesystem modification events.
     func stopMonitoring() {
         directoryMonitor.stopMonitoring()
     }
 
+    /// Handles double-click user interaction: navigates into directories or opens files in default apps.
+    ///
+    /// - Parameter item: The clicked file item.
     func handleDoubleClick(on item: FileItem) {
         if item.isDirectory {
             navigateToURL(item.url)
@@ -380,6 +450,7 @@ final class FileBrowserViewModel {
 
     // MARK: - Clipboard & CRUD
 
+    /// Resolves the items to act upon when a context menu or shortcut is invoked on a table row.
     func itemsToActOn(for clickedItem: FileItem) -> [FileItem] {
         if selectedItemIDs.contains(clickedItem.id) {
             return selectedFiles
@@ -388,14 +459,23 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Places the selected items into the in-memory clipboard for a copy operation.
+    ///
+    /// - Parameter items: The items to copy.
     func copyItems(_ items: [FileItem]) {
         clipboardService.copy(urls: items.map(\.url))
     }
 
+    /// Places the selected items into the in-memory clipboard for a cut (relocation) operation.
+    ///
+    /// - Parameter items: The items to cut.
     func cutItems(_ items: [FileItem]) {
         clipboardService.cut(urls: items.map(\.url))
     }
 
+    /// Pastes the clipboard files into the specified directory.
+    ///
+    /// - Parameter destination: The directory receiving the files.
     func pasteClipboard(to destination: URL) {
         guard !clipboardService.isEmpty else { return }
         do {
@@ -413,16 +493,23 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Copies the absolute filesystem paths of the specified items to the system pasteboard.
+    ///
+    /// - Parameter items: The items whose paths should be copied.
     func copyPaths(for items: [FileItem]) {
         pasteboardService.copyStrings(items.map(\.url.path))
     }
 
+    /// Initiates deletion flow by prompting the user for confirmation.
+    ///
+    /// - Parameter items: The items targeted for deletion.
     func confirmDelete(items: [FileItem]) {
         guard !items.isEmpty else { return }
         itemsPendingDeletion = items
         showingDeleteConfirmation = true
     }
 
+    /// Executes the pending deletion, safely moving the items to the macOS Trash.
     func executeDelete() {
         let items = itemsPendingDeletion
         itemsPendingDeletion = []
@@ -439,10 +526,12 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Cancels the pending deletion and clears targeted items.
     func cancelDelete() {
         itemsPendingDeletion = []
     }
 
+    /// Creates a new directory inside the current path with the name entered in `newFolderName`.
     func createFolder() {
         let trimmed = newFolderName.trimmingCharacters(in: .whitespaces)
         guard !trimmed.isEmpty else { return }
@@ -459,6 +548,11 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Moves the specified items into a target destination directory.
+    ///
+    /// - Parameters:
+    ///   - items: The items to move.
+    ///   - destination: The directory into which the items should be moved.
     func moveItems(_ items: [FileItem], to destination: URL) {
         guard !items.isEmpty else { return }
         do {
@@ -472,6 +566,9 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Prompts the user with an open panel to select a folder destination and moves the items there.
+    ///
+    /// - Parameter items: The items to move.
     func promptMove(items: [FileItem]) {
         guard !items.isEmpty else { return }
         let panel = NSOpenPanel()
@@ -489,16 +586,21 @@ final class FileBrowserViewModel {
 
     // MARK: - Open / Reveal
 
+    /// Reveals the current directory in macOS Finder.
     func openInFinder() {
         workspaceService.revealInFinder(url: currentPathURL)
     }
 
+    /// Reveals the specified items in macOS Finder.
+    ///
+    /// - Parameter items: The items to reveal.
     func revealInFinder(items: [FileItem]) {
         workspaceService.revealInFinder(urls: items.map(\.url))
     }
 
     // MARK: - Import & Drag/Drop
 
+    /// Displays an open panel allowing the user to select external files/folders to copy into the current directory.
     func selectFileToImport() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
@@ -518,6 +620,7 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Displays an open panel allowing the user to select media files to import into the simulator's Photo Library.
     func selectMediaToImport() {
         let panel = NSOpenPanel()
         panel.canChooseFiles = true
@@ -540,6 +643,13 @@ final class FileBrowserViewModel {
         }
     }
 
+    /// Processes items dropped from macOS drag-and-drop operations.
+    ///
+    /// Distinguishes between internal reordering/moving within the same browser and external file importing.
+    /// - Parameters:
+    ///   - providers: The item providers transferred by the drop operation.
+    ///   - targetDirectory: The destination directory. Defaults to `currentPathURL` if nil.
+    /// - Returns: `true` if the drop operation was handled.
     func handleDrop(providers: [NSItemProvider], targetDirectory: URL? = nil) -> Bool {
         let destDir = targetDirectory ?? currentPathURL
 
@@ -586,6 +696,7 @@ final class FileBrowserViewModel {
 
     // MARK: - App Actions
 
+    /// Launches the app if stopped, or terminates it if running on the simulator.
     func toggleAppExecution() {
         Task {
             isPerformingAppAction = true
@@ -600,6 +711,7 @@ final class FileBrowserViewModel {
 
     // MARK: - Helpers
 
+    /// Checks whether the active sort order matches the given keypath.
     func isSortedBy<T>(_ keyPath: KeyPath<FileItem, T>) -> Bool {
         guard let first = sortOrder.first else { return false }
         return first.keyPath == keyPath

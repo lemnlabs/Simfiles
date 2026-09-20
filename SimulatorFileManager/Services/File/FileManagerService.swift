@@ -9,19 +9,64 @@ import AppKit
 import Foundation
 import UniformTypeIdentifiers
 
+/// Abstraction of file system manipulation operations within simulator sandbox directories.
 protocol FileManagerServiceProtocol: Sendable {
+    /// Lists all file and folder entries residing directly within the specified directory URL.
+    ///
+    /// - Parameter directoryURL: The directory whose contents should be listed.
+    /// - Returns: An array of ``FileItem`` models representing the directory contents. Returns empty if directory does not exist.
     func listFiles(at directoryURL: URL) -> [FileItem]
+
+    /// Copies multiple external source files into the specified destination directory, resolving filename duplicates.
+    ///
+    /// - Parameters:
+    ///   - sourceURLs: Array of file URLs to import.
+    ///   - destinationDirectory: The directory into which the files will be copied.
+    /// - Returns: The array of created destination URLs.
+    /// - Throws: An error if directory creation or file copying fails.
     @discardableResult
     func importFiles(from sourceURLs: [URL], to destinationDirectory: URL) throws -> [URL]
+
+    /// Copies files from source locations into the destination directory.
+    ///
+    /// - Parameters:
+    ///   - sourceURLs: Array of file URLs to copy.
+    ///   - destinationDirectory: Target folder URL.
+    /// - Returns: The array of newly created destination URLs.
+    /// - Throws: An error if copying fails.
     @discardableResult
     func copyFiles(from sourceURLs: [URL], to destinationDirectory: URL) throws -> [URL]
+
+    /// Moves files to the specified destination directory with recursion prevention and collision avoidance.
+    ///
+    /// - Parameters:
+    ///   - sourceURLs: Array of file URLs to move.
+    ///   - destinationDirectory: Target folder URL.
+    /// - Returns: The array of relocated destination URLs.
+    /// - Throws: An error if a parent folder is attempted to be moved into its own subdirectory, or if move operations fail.
     @discardableResult
     func moveFiles(from sourceURLs: [URL], to destinationDirectory: URL) throws -> [URL]
+
+    /// Safely deletes the item at the specified URL by moving it to the macOS Trash.
+    ///
+    /// - Parameter url: The file or folder URL to trash.
+    /// - Throws: An error if the item cannot be moved to the Trash.
     func deleteItem(at url: URL) throws
+
+    /// Safely deletes multiple items by moving each to the macOS Trash.
+    ///
+    /// - Parameter urls: The array of file or folder URLs to trash.
+    /// - Throws: An error if any item fails to be trashed.
     func deleteItems(at urls: [URL]) throws
+
+    /// Creates a directory at the given URL, including intermediate directories if needed.
+    ///
+    /// - Parameter url: The directory path to create.
+    /// - Throws: An error if directory creation fails.
     func createDirectory(at url: URL) throws
 }
 
+/// Provides file operations on the local file system for simulator app data containers.
 nonisolated final class FileManagerService: FileManagerServiceProtocol, Sendable {
     init() {}
 
