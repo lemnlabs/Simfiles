@@ -1,3 +1,10 @@
+//
+//  View+Alert.swift
+//  SimulatorFileManager
+//
+//  Copyright © 2026 Huigyun Jeong. All rights reserved.
+//
+
 import SwiftUI
 
 extension View {

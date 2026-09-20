@@ -1,3 +1,10 @@
+//
+//  SimctlClient.swift
+//  SimulatorFileManager
+//
+//  Copyright © 2026 Huigyun Jeong. All rights reserved.
+//
+
 import AppKit
 import Foundation
 

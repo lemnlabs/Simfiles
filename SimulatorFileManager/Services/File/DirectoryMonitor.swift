@@ -1,3 +1,10 @@
+//
+//  DirectoryMonitor.swift
+//  SimulatorFileManager
+//
+//  Copyright © 2026 Huigyun Jeong. All rights reserved.
+//
+
 import Foundation
 import Synchronization
 
