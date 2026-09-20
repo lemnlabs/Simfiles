@@ -83,13 +83,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "1개의 파일이 '%2'의 Documents 폴더로 복사되었습니다."
+                  "value" : "1개의 파일이 ‘%2$@’의 Documents 폴더로 복사되었습니다."
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%1 파일이 '%2'의 Documents 폴더로 복사되었습니다."
+                  "value" : "%1$lld 파일이 ‘%2$@’의 Documents 폴더로 복사되었습니다."
                 }
               }
             }
@@ -1910,7 +1910,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%2 중 %1 선택됨"
+            "value" : "%1$lld/%2$lld 선택됨"
           }
         }
       }
@@ -1928,7 +1928,7 @@
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%2 중 %1 선택됨 (%3)"
+            "value" : "%1$lld/%2$lld 선택됨 (%3$@)"
           }
         }
       }
@@ -1961,13 +1961,13 @@
               "one" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "1개 항목"
+                  "value" : "1개의 항목"
                 }
               },
               "other" : {
                 "stringUnit" : {
                   "state" : "translated",
-                  "value" : "%lld개 항목"
+                  "value" : "%lld개의 항목"
                 }
               }
             }
