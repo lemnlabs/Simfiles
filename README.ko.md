@@ -63,9 +63,6 @@
 
 ## Installation
 
-> [!NOTE]
-> Simfiles는 현재 활발히 개발 중인 프리릴리스(Pre-release) 프로젝트입니다.
-
 ### 방법 1: Homebrew Cask (권장)
 [lemnlabs/homebrew-tap](https://github.com/lemnlabs/homebrew-tap) 저장소를 통해 터미널에서 한 줄로 간편하게 설치할 수 있습니다:
 

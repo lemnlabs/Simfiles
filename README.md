@@ -63,9 +63,6 @@
 
 ## Installation
 
-> [!NOTE]
-> Simfiles is currently in active development (pre-release).
-
 ### Option 1: Homebrew Cask (Recommended)
 Install directly via the [lemnlabs/homebrew-tap](https://github.com/lemnlabs/homebrew-tap) repository:
 
