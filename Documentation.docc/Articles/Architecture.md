@@ -1,10 +1,10 @@
 # Architecture
 
-Understand the architectural layers, concurrency model, and dependency injection patterns in SimulatorFileManager.
+Understand the architectural layers, concurrency model, and dependency injection patterns in Simfiles.
 
 ## Overview
 
-SimulatorFileManager is built as a native macOS utility following the **MVVM (Model-View-ViewModel)** architectural pattern. It decouples high-level UI workflows from low-level POSIX and CLI system interactions using protocol-based service abstractions.
+Simfiles is built as a native macOS utility following the **MVVM (Model-View-ViewModel)** architectural pattern. It decouples high-level UI workflows from low-level POSIX and CLI system interactions using protocol-based service abstractions.
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -55,7 +55,7 @@ Encapsulates all interactions with external processes and the macOS kernel:
 
 ## Concurrency & Isolation Model
 
-SimulatorFileManager leverages Swift Concurrency features (async/await, `@MainActor`, `Sendable`, and `Synchronization.Mutex`):
+Simfiles leverages Swift Concurrency features (async/await, `@MainActor`, `Sendable`, and `Synchronization.Mutex`):
 
 ### MainActor Isolation
 All UI state holders, including view models and presentation helpers, are isolated to `@MainActor` to prevent race conditions during UI updates.

@@ -1,10 +1,10 @@
 # Data Flow & Execution Lifecycles
 
-Explore the primary execution lifecycles, background pipelines, and real-time synchronization flows in SimulatorFileManager.
+Explore the primary execution lifecycles, background pipelines, and real-time synchronization flows in Simfiles.
 
 ## Overview
 
-Data in SimulatorFileManager flows through three primary pipelines:
+Data in Simfiles flows through three primary pipelines:
 1. **Simulator Discovery**: Querying available devices and monitoring boot states.
 2. **App & Container Scanning**: Correlating app bundles with sandbox data containers.
 3. **Real-time File Browsing**: Navigating sandbox directories with live change monitoring and clipboard management.

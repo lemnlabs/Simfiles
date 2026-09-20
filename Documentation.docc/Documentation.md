@@ -1,10 +1,10 @@
-# ``SimulatorFileManager``
+# ``Simfiles``
 
 A macOS desktop utility for managing Apple platform simulators and inspecting application sandbox file systems in real time.
 
 ## Overview
 
-`SimulatorFileManager` provides an intuitive interface to discover, control, and inspect local iOS, iPadOS, watchOS, and tvOS simulators. It enables developers to explore app sandboxes (`Documents`, `Library`, `Caches`, `tmp`, etc.) with Finder-like navigation, real-time file updates, drag-and-drop support, and photo library media injection.
+`Simfiles` provides an intuitive interface to discover, control, and inspect local iOS, iPadOS, watchOS, and tvOS simulators. It enables developers to explore app sandboxes (`Documents`, `Library`, `Caches`, `tmp`, etc.) with Finder-like navigation, real-time file updates, drag-and-drop support, and photo library media injection.
 
 ### Key Abstractions & Entry Points
 
