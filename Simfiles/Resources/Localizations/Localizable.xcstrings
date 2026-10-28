@@ -2515,6 +2515,96 @@
         }
       }
     },
+    "simulator.action.showLocalStorageInFinder.generic" : {
+      "comment" : "Context menu action to reveal local storage directory in Finder for generic devices",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show Local Files in Finder"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder에서 로컬 파일 폴더 보기"
+          }
+        }
+      }
+    },
+    "simulator.action.showLocalStorageInFinder.ipad" : {
+      "comment" : "Context menu action to reveal 'On My iPad' directory in Finder",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show \"On My iPad\" in Finder"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder에서 '나의 iPad' 폴더 보기"
+          }
+        }
+      }
+    },
+    "simulator.action.showLocalStorageInFinder.iphone" : {
+      "comment" : "Context menu action to reveal 'On My iPhone' directory in Finder",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show \"On My iPhone\" in Finder"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finder에서 '나의 iPhone' 폴더 보기"
+          }
+        }
+      }
+    },
+    "simulator.alert.localStorageNotFound.message" : {
+      "comment" : "Alert message when the simulator local storage directory is not found",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The local storage folder could not be found. Please boot the simulator at least once so the system initializes the storage container."
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "로컬 저장소 폴더를 찾을 수 없습니다. 저장소 컨테이너 생성을 위해 시뮬레이터를 한 번 이상 실행해 주세요."
+          }
+        }
+      }
+    },
+    "simulator.alert.localStorageNotFound.title" : {
+      "comment" : "Alert title when the simulator local storage directory is not found",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Folder Not Found"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "폴더를 찾을 수 없음"
+          }
+        }
+      }
+    },
     "simulator.action.shutdown" : {
       "comment" : "Context menu action to shut down device",
       "extractionState" : "manual",

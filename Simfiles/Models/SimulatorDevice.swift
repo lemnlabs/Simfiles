@@ -19,6 +19,13 @@ nonisolated enum DeviceState: String, Codable, CaseIterable, Sendable {
     }
 }
 
+/// The device kind used for customizing local storage labels (e.g. "On My iPhone" vs "On My iPad").
+nonisolated enum LocalStorageDeviceKind: Sendable {
+    case iphone
+    case ipad
+    case generic
+}
+
 /// Represents an Apple platform simulator device discovered on the local machine.
 nonisolated struct SimulatorDevice: Identifiable, Hashable, Sendable {
     var id: String { udid }
@@ -73,6 +80,82 @@ nonisolated struct SimulatorDevice: Identifiable, Hashable, Sendable {
     /// File URL to the device's shared media directory.
     var mediaURL: URL {
         dataURL.appendingPathComponent("Media")
+    }
+
+    /// File URL to the device's shared app group containers directory (`Containers/Shared/AppGroup`).
+    var sharedAppGroupContainersURL: URL {
+        containersURL.appendingPathComponent("Shared/AppGroup")
+    }
+
+    /// Indicates whether this platform supports local file provider storage (iPhone, iPad, visionOS).
+    var supportsLocalStorage: Bool {
+        let lowerRuntime = runtimeIdentifier.lowercased()
+        let lowerName = name.lowercased()
+        if lowerRuntime.contains("watchos") || lowerRuntime.contains("tvos")
+            || lowerName.contains("watch") || lowerName.contains("tv")
+        {
+            return false
+        }
+        return true
+    }
+
+    /// Classification of the device for local storage labels.
+    var localStorageDeviceKind: LocalStorageDeviceKind {
+        let lowerName = name.lowercased()
+        if lowerName.contains("ipad") {
+            return .ipad
+        } else if lowerName.contains("iphone") {
+            return .iphone
+        }
+        return .generic
+    }
+
+    /// Resolves the URL to the "File Provider Storage" directory inside the `group.com.apple.FileProvider.LocalStorage` container.
+    var localStorageURL: URL? {
+        let appGroupsURL = sharedAppGroupContainersURL
+        guard FileManager.default.fileExists(atPath: appGroupsURL.path) else {
+            return nil
+        }
+
+        guard
+            let groupDirectories = try? FileManager.default.contentsOfDirectory(
+                at: appGroupsURL,
+                includingPropertiesForKeys: nil,
+                options: [.skipsHiddenFiles]
+            )
+        else {
+            return nil
+        }
+
+        // 1. Preferred lookup: parse .com.apple.mobile_container_manager.metadata.plist for MCMMetadataIdentifier
+        for groupDir in groupDirectories {
+            let plistURL = groupDir.appendingPathComponent(
+                ".com.apple.mobile_container_manager.metadata.plist"
+            )
+            if let data = try? Data(contentsOf: plistURL),
+                let plist = try? PropertyListSerialization.propertyList(
+                    from: data,
+                    format: nil
+                ) as? [String: Any],
+                let identifier = plist["MCMMetadataIdentifier"] as? String,
+                identifier == "group.com.apple.FileProvider.LocalStorage"
+            {
+                return groupDir.appendingPathComponent("File Provider Storage")
+            }
+        }
+
+        // 2. Fallback: find any group directory containing "File Provider Storage"
+        for groupDir in groupDirectories {
+            let storageURL = groupDir.appendingPathComponent("File Provider Storage")
+            var isDirectory: ObjCBool = false
+            if FileManager.default.fileExists(atPath: storageURL.path, isDirectory: &isDirectory),
+                isDirectory.boolValue
+            {
+                return storageURL
+            }
+        }
+
+        return nil
     }
 
     init(

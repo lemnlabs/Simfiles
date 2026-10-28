@@ -79,6 +79,11 @@ struct SidebarView: View {
                                     onRevealMediaFolder: {
                                         viewModel.revealMediaFolder(for: device)
                                     },
+                                    onRevealLocalStorageFolder: {
+                                        viewModel.revealLocalStorageFolder(
+                                            for: device
+                                        )
+                                    },
                                     onAddMedia: {
                                         viewModel.addMedia(for: device)
                                     },
@@ -120,5 +125,6 @@ struct SidebarView: View {
                 }
             }
         }
+        .alert(item: $viewModel.activeAlert)
     }
 }

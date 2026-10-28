@@ -20,6 +20,9 @@ final class SidebarViewModel {
     /// When true, only simulators in the `.booted` state are shown.
     var showOnlyBooted: Bool = false
 
+    /// Currently presented alert item in the sidebar.
+    var activeAlert: AlertItem?
+
     let simulatorManager: SimulatorManager
     private let workspaceService: WorkspaceServiceProtocol
     private let pasteboardService: PasteboardServiceProtocol
@@ -113,6 +116,26 @@ final class SidebarViewModel {
     /// - Parameter device: The target simulator device.
     func revealMediaFolder(for device: SimulatorDevice) {
         workspaceService.revealInFinder(url: device.mediaURL)
+    }
+
+    /// Opens the "On My iPhone / iPad" local storage folder (`File Provider Storage`) in macOS Finder.
+    ///
+    /// - Parameter device: The target simulator device.
+    func revealLocalStorageFolder(for device: SimulatorDevice) {
+        if let url = device.localStorageURL {
+            if !FileManager.default.fileExists(atPath: url.path) {
+                try? FileManager.default.createDirectory(
+                    at: url,
+                    withIntermediateDirectories: true
+                )
+            }
+            workspaceService.openItem(url: url)
+        } else {
+            activeAlert = AlertItem(
+                title: .simulatorAlertLocalStorageNotFoundTitle,
+                message: String(localized: .simulatorAlertLocalStorageNotFoundMessage)
+            )
+        }
     }
 
     /// Displays an open file panel to select photos/videos and imports them into the simulator.

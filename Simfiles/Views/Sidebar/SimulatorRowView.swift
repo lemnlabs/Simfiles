@@ -15,6 +15,7 @@ struct SimulatorRowView: View {
     let onOpenSimulator: () -> Void
     let onRevealInFinder: () -> Void
     var onRevealMediaFolder: (() -> Void)? = nil
+    var onRevealLocalStorageFolder: (() -> Void)? = nil
     var onAddMedia: (() -> Void)? = nil
     var onCopyUDID: (() -> Void)? = nil
 
@@ -72,6 +73,12 @@ struct SimulatorRowView: View {
                 }
             }
 
+            if device.supportsLocalStorage, let onRevealLocalStorageFolder {
+                Button(localStorageActionTitle) {
+                    onRevealLocalStorageFolder()
+                }
+            }
+
             if device.state.isBooted, let onAddMedia {
                 Button(.simulatorActionAddMedia) {
                     onAddMedia()
@@ -88,6 +95,17 @@ struct SimulatorRowView: View {
                     NSPasteboard.general.setString(device.udid, forType: .string)
                 }
             }
+        }
+    }
+
+    private var localStorageActionTitle: LocalizedStringResource {
+        switch device.localStorageDeviceKind {
+        case .ipad:
+            return .simulatorActionShowLocalStorageInFinderIpad
+        case .iphone:
+            return .simulatorActionShowLocalStorageInFinderIphone
+        case .generic:
+            return .simulatorActionShowLocalStorageInFinderGeneric
         }
     }
 
